@@ -12,9 +12,9 @@ const PhoneNumber = ({ phoneNumber, showNumber }) => {
   return (
     <Text onPress={handleCall}>
       <Icon name="call-outline" size={25} color="black"/>
-      <Text style={styles.phoneNumber}>
+      {/* <Text style={styles.phoneNumber}>
         {showNumber && phoneNumber}
-      </Text>
+      </Text> */}
     </Text>
   );
 };

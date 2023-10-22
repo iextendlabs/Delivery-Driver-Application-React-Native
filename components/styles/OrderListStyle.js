@@ -20,8 +20,34 @@ const OrderListStyle = {
     marginBottom: 10,
     flexDirection: "row",
   },
+  Pending: {
+    backgroundColor: '#bfd9ff',
+  },
+  Accepted: {
+    backgroundColor: '#C1E1C1',
+  },
+  Coming: {
+    backgroundColor: '#E1D5E7',
+  },
+  Traveling: {
+    backgroundColor: '#FCE4D6',
+  },
+  Dropped: {
+    backgroundColor: '#fffbcc',
+  },
+  arrivedPick: {
+    backgroundColor: '#D0E8F2',
+  },
+  pickMe: {
+    backgroundColor: '#dfdfdf',
+  },
   heading: {
     fontSize: 16,
+    fontWeight: "bold",
+    marginBottom: 5,
+  },
+  status: {
+    fontSize: 20,
     fontWeight: "bold",
     marginBottom: 5,
   },

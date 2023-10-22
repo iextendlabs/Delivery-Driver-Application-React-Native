@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "saloon",
+    "name": "Saloon Driver App",
     "slug": "saloon",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -18,13 +18,21 @@
       "supportsTablet": true
     },
     "android": {
+      "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.iextendlabs.driver.saloon"
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "1d7c977e-2c67-4b1a-bd8c-358fe87b6724"
+      }
+    },
+    "owner": "hamza0003"
   }
 }

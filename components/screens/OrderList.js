@@ -16,6 +16,8 @@ import OrderListStyle from "../styles/OrderListStyle";
 import Icon from "react-native-vector-icons/Ionicons";
 import { OrderDriverStatusUpdateUrl } from "../config/Api";
 import LocationElement from "../modules/LocationElement";
+import WhatsAppElement from "../modules/WhatsappElement";
+import PhoneNumber from "../modules/PhoneNumber";
 
 const OrderList = ({ initialParams }) => {
   const [orders, setOrders] = useState([]);
@@ -60,88 +62,100 @@ const OrderList = ({ initialParams }) => {
     }
   };
 
-  const renderOrder = ({ item }) => (
-    <TouchableOpacity style={styles.orderContainer}>
-      <View style={{ flex: 1.5 }}>
-        <Text style={styles.heading}>{item.staff_name}</Text>
-        <Text style={styles.text}>
-          {item.city}, {item.area}, {item.buildingName}, {item.flatVilla},{" "}
-          {item.street}
-        </Text>
-        <Text style={styles.heading}>
-          <Icon name="ios-calendar" size={15} color="black" /> {item.date}{" "}
-        </Text>
-        <Text style={styles.text}>{item.time_slot_value}</Text>
-        <Text style={styles.heading}>Status:{item.driver_status}</Text>
-      </View>
-      <View style={styles.OrderLinks}>
-        <LocationElement
-          latitude={item.latitude}
-          longitude={item.longitude}
-          address={
-            item.buildingName +
-            " " +
-            item.street +
-            "," +
-            item.area +
-            " " +
-            item.city
-          }
-        />
-        {item.driver_status === "Pending" && (
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => handleOrderStatus(item, "Accept")}
-          >
-            <Text style={styles.buttonText}>Accept</Text>
-          </TouchableOpacity>
-        )}
+  const renderOrder = ({ item }) => {
+    const status = item.driver_status;
+    let statusStyle = {};
 
-        {item.driver_status === "Accepted" && (
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => handleOrderStatus(item, "Drive to pick")}
-          >
-            <Text style={styles.buttonText}>Drive to pick</Text>
-          </TouchableOpacity>
-        )}
-        {item.driver_status === "Drive to pick" && (
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => handleOrderStatus(item, "Picked")}
-          >
-            <Text style={styles.buttonText}>Picked</Text>
-          </TouchableOpacity>
-        )}
+    if (status === "Arrived for pick") {
+      statusStyle = styles.arrivedPick;
+    } else if (status === "Pick me") {
+      statusStyle = styles.pickMe;
+    } else {
+      statusStyle = styles[status];
+    }
+    return (
+      <TouchableOpacity style={[styles.orderContainer, statusStyle]}>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.heading}>{item.staff_name}</Text>
+          <Text style={styles.heading}> ID: {item.id}</Text>
+          <Text style={styles.text}>
+            {item.city}, {item.area}, {item.buildingName}, {item.flatVilla},{" "}
+            {item.street}
+          </Text>
+          <Text style={styles.text}>{item.time_slot_value}</Text>
+          <Text style={styles.status}>{item.driver_status}</Text>
+        </View>
+        <View style={styles.OrderLinks}>
+          <WhatsAppElement showNumber={false} phoneNumber={item.staff_number} />
+          <PhoneNumber phoneNumber={item.staff_number} showNumber={true} />
+          <LocationElement
+            latitude={item.latitude}
+            longitude={item.longitude}
+            address={
+              item.buildingName +
+              " " +
+              item.street +
+              "," +
+              item.area +
+              " " +
+              item.city
+            }
+          />
+          {item.driver_status === "Pick me" && (
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => handleOrderStatus(item, "Accepted")}
+            >
+              <Text style={styles.buttonText}>Update</Text>
+            </TouchableOpacity>
+          )}
 
-        {item.driver_status === "Picked" && (
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => handleOrderStatus(item, "Drop")}
-          >
-            <Text style={styles.buttonText}>Drop</Text>
-          </TouchableOpacity>
-        )}
+          {item.driver_status === "Accepted" && (
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => handleOrderStatus(item, "Coming")}
+            >
+              <Text style={styles.buttonText}>Update</Text>
+            </TouchableOpacity>
+          )}
+          {item.driver_status === "Coming" && (
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => handleOrderStatus(item, "Arrived for pick")}
+            >
+              <Text style={styles.buttonText}>Update</Text>
+            </TouchableOpacity>
+          )}
 
-        {item.driver_status === "Drop" && (
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => handleOrderStatus(item, "Waiting")}
-          >
-            <Text style={styles.buttonText}>Waiting</Text>
-          </TouchableOpacity>
-        )}
-      </View>
+          {item.driver_status === "Arrived for pick" && (
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => handleOrderStatus(item, "Traveling")}
+            >
+              <Text style={styles.buttonText}>Update</Text>
+            </TouchableOpacity>
+          )}
 
-      {/* Other order fields */}
-    </TouchableOpacity>
-  );
+          {item.driver_status === "Traveling" && (
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => handleOrderStatus(item, "Dropped")}
+            >
+              <Text style={styles.buttonText}>Update</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+
+        {/* Other order fields */}
+      </TouchableOpacity>
+    );
+  };
 
   const handleOrderStatus = async (order, status) => {
     const userId = await AsyncStorage.getItem("@user_id");
     Alert.alert(
       "Confirm",
-      "Are you sure you want to " + status + " this order?",
+      "Are you sure to change order status to " + status + "?",
       [
         {
           text: "Cancel",

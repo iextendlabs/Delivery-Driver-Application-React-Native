@@ -1,4 +1,4 @@
-const BaseUrl = 'https://services.upgradeopencart.com/api/';
+const BaseUrl = 'https://lipslay.com/api/';
 
 const OrderUrl = BaseUrl+'driverOrders?';
 const LoginUrl = BaseUrl+'driverLogin';
