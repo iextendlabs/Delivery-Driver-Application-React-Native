@@ -9,8 +9,6 @@ import {
   Alert,
 } from "react-native";
 import { OrderUrl } from "../config/Api";
-import { useRoute } from "@react-navigation/native";
-import OrderLinks from "../modules/OrderLinks";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import OrderListStyle from "../styles/OrderListStyle";
 import Icon from "react-native-vector-icons/Ionicons";
@@ -18,12 +16,15 @@ import { OrderDriverStatusUpdateUrl } from "../config/Api";
 import LocationElement from "../modules/LocationElement";
 import WhatsAppElement from "../modules/WhatsappElement";
 import PhoneNumber from "../modules/PhoneNumber";
+import OrderChatModal from "./OrderChatModal";
 
 const OrderList = ({ initialParams }) => {
   const [orders, setOrders] = useState([]);
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [loading, setLoading] = useState(true);
+  const [orderChatModalVisible, setOrderChatModalVisible] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState(null);
 
   const setSuccess = (message) => {
     setSuccessMessage(message);
@@ -101,6 +102,14 @@ const OrderList = ({ initialParams }) => {
               item.city
             }
           />
+          
+        <Icon
+          name="chatbubble-ellipses-outline"
+          size={25}
+          color="blue" // Change this to your desired color for 'Pending' status.
+          style={styles.icons}
+          onPress={() => handleOrderChatStatus(item)}
+        />
           {item.driver_status === "Pick me" && (
             <TouchableOpacity
               style={styles.button}
@@ -151,6 +160,12 @@ const OrderList = ({ initialParams }) => {
     );
   };
 
+  const handleOrderChatStatus = (order) => {
+    // console.log(order.id);
+    setSelectedOrder(order.id);
+    setOrderChatModalVisible(true);
+  };
+
   const handleOrderStatus = async (order, status) => {
     const userId = await AsyncStorage.getItem("@user_id");
     Alert.alert(
@@ -192,6 +207,11 @@ const OrderList = ({ initialParams }) => {
     );
   };
 
+  const closeModal = () => {
+    setOrderChatModalVisible(false);
+    fetchOrders();
+  };
+
   if (loading) {
     return (
       <View style={styles.loaderContainer}>
@@ -218,6 +238,11 @@ const OrderList = ({ initialParams }) => {
           keyExtractor={(item) => item.id.toString()}
         />
       )}
+      <OrderChatModal
+        visible={orderChatModalVisible}
+        order={selectedOrder}
+        onClose={closeModal}
+      />
     </View>
   );
 };

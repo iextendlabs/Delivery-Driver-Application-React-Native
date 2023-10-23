@@ -251,6 +251,36 @@ const OrderListStyle = {
     borderRadius: 5,
     margin: 5,
   },
+  userMessageContainer: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    marginBottom: 10,
+  },
+  otherMessageContainer: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    marginBottom: 10,
+  },
+  messageBubble: {
+    backgroundColor: '#DCF8C6', // You can customize the background color of the message bubble
+    padding: 10,
+    borderRadius: 10,
+  },
+  messageText: {
+    fontSize: 16,
+  },
+  messageRole: {
+    fontSize: 12,
+    color: '#8f9193',
+  },
+  chatModalContent: {
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    padding: 20,
+    width: "80%",
+    flex: 1, 
+    flexDirection: 'column'
+  },
 };
 
 export default OrderListStyle;
