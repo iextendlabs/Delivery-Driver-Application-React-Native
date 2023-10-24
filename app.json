@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Saloon Driver App",
-    "slug": "saloon",
+    "name": "Saloon Driver",
+    "slug": "driver",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -30,9 +30,8 @@
     },
     "extra": {
       "eas": {
-        "projectId": "1d7c977e-2c67-4b1a-bd8c-358fe87b6724"
+        "projectId": "c4aea27e-de74-486c-afc9-90329b42a96d"
       }
-    },
-    "owner": "hamza0003"
+    }
   }
 }

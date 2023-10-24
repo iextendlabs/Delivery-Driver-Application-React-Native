@@ -17,6 +17,7 @@ import LocationElement from "../modules/LocationElement";
 import WhatsAppElement from "../modules/WhatsappElement";
 import PhoneNumber from "../modules/PhoneNumber";
 import OrderChatModal from "./OrderChatModal";
+import { useNavigation } from '@react-navigation/native';
 
 const OrderList = ({ initialParams }) => {
   const [orders, setOrders] = useState([]);
@@ -25,6 +26,8 @@ const OrderList = ({ initialParams }) => {
   const [loading, setLoading] = useState(true);
   const [orderChatModalVisible, setOrderChatModalVisible] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [notification, setNotification] = useState('');
+  const navigation = useNavigation();
 
   const setSuccess = (message) => {
     setSuccessMessage(message);
@@ -41,24 +44,31 @@ const OrderList = ({ initialParams }) => {
   };
 
   useEffect(() => {
+    setLoading(true);
     fetchOrders();
+    setLoading(false);
+
+    const reloadApp = () => {
+      fetchOrders();
+    };
+
+    const intervalId = setInterval(reloadApp, 2000); // Reload every 2 seconds
+
+    return () => clearInterval(intervalId);
   }, []);
 
   const fetchOrders = async () => {
     const userId = await AsyncStorage.getItem("@user_id");
     if (userId) {
-      setLoading(true);
       try {
         const response = await fetch(OrderUrl + "user_id=" + userId);
         const data = await response.json();
-        setOrders(data);
-        setLoading(false);
+        setOrders(data.orders);
+        setNotification(data.notification)
       } catch (error) {
         console.error("Error fetching orders:", error);
-        setLoading(false);
       }
     } else {
-      setLoading(false);
       navigation.navigate("Login");
     }
   };
@@ -102,14 +112,14 @@ const OrderList = ({ initialParams }) => {
               item.city
             }
           />
-          
-        <Icon
-          name="chatbubble-ellipses-outline"
-          size={25}
-          color="blue" // Change this to your desired color for 'Pending' status.
-          style={styles.icons}
-          onPress={() => handleOrderChatStatus(item)}
-        />
+
+          <Icon
+            name="chatbubble-ellipses-outline"
+            size={25}
+            color="blue" // Change this to your desired color for 'Pending' status.
+            style={styles.icons}
+            onPress={() => handleOrderChatStatus(item)}
+          />
           {item.driver_status === "Pick me" && (
             <TouchableOpacity
               style={styles.button}
@@ -179,7 +189,6 @@ const OrderList = ({ initialParams }) => {
         {
           text: "Accept",
           onPress: async () => {
-            setLoading(true);
             try {
               const response = await fetch(
                 OrderDriverStatusUpdateUrl +
@@ -199,7 +208,6 @@ const OrderList = ({ initialParams }) => {
             } catch (error) {
               setError("Failed to " + status + " order. Please try again.");
             }
-            setLoading(false);
           },
         },
       ],
@@ -211,7 +219,6 @@ const OrderList = ({ initialParams }) => {
     setOrderChatModalVisible(false);
     fetchOrders();
   };
-
   if (loading) {
     return (
       <View style={styles.loaderContainer}>

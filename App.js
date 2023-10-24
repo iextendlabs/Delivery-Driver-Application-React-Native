@@ -1,18 +1,19 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
-import { NavigationContainer, useNavigation } from '@react-navigation/native';
-import { createDrawerNavigator } from '@react-navigation/drawer';
-import MainStyles from './components/styles/Main';
-import SettingsScreen from './components/screens/SettingsScreen';
-import OrderList from './components/screens/OrderList';
-import LoginScreen from './components/screens/LoginScreen';
+import React, { useEffect, useState } from "react";
+import { View, Text, TouchableOpacity, StyleSheet, Alert } from "react-native";
+import { NavigationContainer, useNavigation } from "@react-navigation/native";
+import { createDrawerNavigator } from "@react-navigation/drawer";
+import MainStyles from "./components/styles/Main";
+import SettingsScreen from "./components/screens/SettingsScreen";
+import OrderList from "./components/screens/OrderList";
+import Notification from "./components/screens/Notification";
+import LoginScreen from "./components/screens/LoginScreen";
 import messaging from "@react-native-firebase/messaging";
-
-import AsyncStorage from '@react-native-async-storage/async-storage'; // Add this line
-import { Title } from 'react-native-paper';
-
+import Icon from "react-native-vector-icons/Ionicons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 const Drawer = createDrawerNavigator();
 const App = () => {
+  const [hasNewNotification, setHasNewNotification] = useState(false);
+  const [iconColor, setIconColor] = useState("#000");
   const requestUserPermission = async () => {
     const authStatus = await messaging().requestPermission();
     const enabled =
@@ -62,23 +63,28 @@ const App = () => {
       console.log("Message handled in the background!", remoteMessage);
     });
 
-    const unsubscribe = messaging().onMessage(async (remoteMessage) => {
+    messaging().onMessage(async (remoteMessage) => {
       const { body, title } = remoteMessage.notification;
       Alert.alert(`${title}`, `${body}`);
+
+      setHasNewNotification(true);
+      setIconColor("#FF0000");
     });
 
-    return unsubscribe;
+    return() => {
+      setHasNewNotification(false);
+      setIconColor("#000");
+    }
   }, []);
 
   const checkAuthentication = async () => {
     try {
-      const userId = await AsyncStorage.getItem('@user_id');
-      if(!userId){
+      const userId = await AsyncStorage.getItem("@user_id");
+      if (!userId) {
         setIsAuthenticated(false);
       }
-
     } catch (error) {
-      console.log('Error retrieving user ID:', error);
+      console.log("Error retrieving user ID:", error);
     }
   };
 
@@ -86,9 +92,39 @@ const App = () => {
     <NavigationContainer>
       <View style={styles.container}>
         <Drawer.Navigator>
-              <Drawer.Screen name="Login" component={LoginScreen} />
-              <Drawer.Screen name="OrderList" options={{ title: 'Home' }} component={OrderList} />
-              <Drawer.Screen name="Settings" component={SettingsScreen} />
+          <Drawer.Screen name="Login" component={LoginScreen} />
+          <Drawer.Screen
+            name="OrderList"
+            options={({ navigation }) => ({
+              title: "Home",
+              headerRight: () => (
+                <Icon
+                  name="notifications-outline"
+                  size={24}
+                  color={iconColor}
+                  style={{ marginRight: 10 }}
+                  onPress={() => navigation.navigate("Notification")} // Navigate to Notification screen
+                />
+              ),
+            })}
+            component={OrderList}
+          />
+          <Drawer.Screen name="Settings" component={SettingsScreen} />
+          <Drawer.Screen
+            name="Notification"
+            options={({ navigation }) => ({
+              headerRight: () => (
+                <Icon
+                  name="home-outline"
+                  size={24}
+                  color="#000"
+                  style={{ marginRight: 10 }}
+                  onPress={() => navigation.navigate("OrderList")} // Navigate to Notification screen
+                />
+              ),
+            })}
+            component={Notification}
+          />
         </Drawer.Navigator>
       </View>
     </NavigationContainer>

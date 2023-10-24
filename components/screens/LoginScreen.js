@@ -39,7 +39,6 @@ const LoginScreen = () => {
   const checkAuthentication = async () => {
     try {
       const userId = await AsyncStorage.getItem("@user_id");
-      
       if (userId) {
         navigation.navigate("OrderList");
       }
