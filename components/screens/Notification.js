@@ -13,7 +13,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import OrderListStyle from "../styles/OrderListStyle";
 import Icon from "react-native-vector-icons/Ionicons";
 import { NotificationUrl } from "../config/Api";
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
 
 const OrderList = ({ initialParams }) => {
@@ -21,7 +21,7 @@ const OrderList = ({ initialParams }) => {
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [loading, setLoading] = useState(true);
-  const navigation = useNavigation(); 
+  const navigation = useNavigation();
   const setSuccess = (message) => {
     setSuccessMessage(message);
     setTimeout(() => {
@@ -39,28 +39,25 @@ const OrderList = ({ initialParams }) => {
   useEffect(() => {
     setLoading(true);
     fetchNotification();
-    setLoading(false);
-  
+
     const reloadApp = () => {
       fetchNotification();
     };
-  
+
     const intervalId = setInterval(reloadApp, 10000); // Reload every 2 seconds
-  
+
     return () => {
       clearInterval(intervalId); // Clear the interval when the component unmounts
     };
   }, []);
-  
 
   const fetchNotification = async () => {
     const userId = await AsyncStorage.getItem("@user_id");
     if (userId) {
       try {
-        const response = await axios.get(
-          `${NotificationUrl}user_id=${userId}`
-        );
+        const response = await axios.get(`${NotificationUrl}user_id=${userId}`);
         setNotification(response.data);
+        setLoading(false);
       } catch (error) {
         console.error("Error fetching notification:", error);
       }
@@ -90,7 +87,9 @@ const OrderList = ({ initialParams }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.orderText}>Total Notification: {notification.length}</Text>
+      <Text style={styles.orderText}>
+        Total Notification: {notification.length}
+      </Text>
       {successMessage !== "" && (
         <Text style={styles.successMessage}>{successMessage}</Text>
       )}

@@ -47,7 +47,6 @@ const OrderList = ({ initialParams }) => {
   useEffect(() => {
     setLoading(true);
     fetchOrders();
-    setLoading(false);
 
     const reloadApp = () => {
       fetchOrders();
@@ -68,7 +67,7 @@ const OrderList = ({ initialParams }) => {
         const { data } = response;
         setOrders(data.orders);
         setNotification(data.notification);
-
+        setLoading(false);
       } catch (error) {
         console.error("Error fetching orders:", error);
       }
