@@ -12,20 +12,27 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LoginUrl } from "../config/Api";
 import axios from "axios";
 import messaging from "@react-native-firebase/messaging";
+import { useFocusEffect } from '@react-navigation/native';
 
 const LoginScreen = () => {
   const navigation = useNavigation();
+
+  useFocusEffect(
+    React.useCallback(() => {
+      checkAuthentication();
+    }, [])
+  );
+
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [error, setError] = useState();
   const [fcmToken, setFcmToken] = useState("");
-
   useEffect(() => {
     checkAuthentication();
     typeof unsubscribeOnTokenRefreshed === "function" &&
       unsubscribeOnTokenRefreshed();
-  }, []);
+  }, [navigation]);
 
   try {
     const unsubscribeOnTokenRefreshed = messaging().onTokenRefresh(
@@ -69,7 +76,12 @@ const LoginScreen = () => {
         const headers = {
           Authorization: `Bearer ${accessToken}`,
         };
-        navigation.navigate("OrderList");
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'OrderList' }],
+        });
+        // navigation.navigate("OrderList");
+
       } else {
         setError("Login failed. Please try again.");
       }
