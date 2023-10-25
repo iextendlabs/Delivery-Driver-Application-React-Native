@@ -24,28 +24,33 @@ const OrderChatModal = ({ visible, order, onClose }) => {
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState("");
   const handleModalClose = () => {
-      onClose();
+    onClose();
   };
 
   useEffect(() => {
-    if (visible && order) { // Check if order is truthy
-      setChat('');
+    if (visible && order) {
       fetchChat();
+      setLoading(true);
+      fetchChat();
+      setLoading(false);
+
+      const reloadApp = () => {
+        fetchChat();
+      };
+
+      const intervalId = setInterval(reloadApp, 2000); // Reload every 2 seconds
+
+      return () => clearInterval(intervalId);
     }
   }, [visible, order]);
 
   const fetchChat = async () => {
-    setLoading(true);
     setUserId(await AsyncStorage.getItem("@user_id"));
     try {
-      const response = await axios.get(
-        `${OrderChatUrl}order_id=${order}`
-      );
+      const response = await axios.get(`${OrderChatUrl}order_id=${order}`);
       setChat(response.data);
-      setLoading(false);
     } catch (error) {
       console.error("Error fetching orders:", error);
-      setLoading(false);
     }
   };
 

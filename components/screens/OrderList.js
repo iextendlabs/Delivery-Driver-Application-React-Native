@@ -18,6 +18,7 @@ import WhatsAppElement from "../modules/WhatsappElement";
 import PhoneNumber from "../modules/PhoneNumber";
 import OrderChatModal from "./OrderChatModal";
 import { useNavigation } from '@react-navigation/native';
+import axios from "axios";
 
 const OrderList = ({ initialParams }) => {
   const [orders, setOrders] = useState([]);
@@ -52,7 +53,7 @@ const OrderList = ({ initialParams }) => {
       fetchOrders();
     };
 
-    const intervalId = setInterval(reloadApp, 2000); // Reload every 2 seconds
+    const intervalId = setInterval(reloadApp, 10000); // Reload every 2 seconds
 
     return () => clearInterval(intervalId);
   }, []);
@@ -61,10 +62,13 @@ const OrderList = ({ initialParams }) => {
     const userId = await AsyncStorage.getItem("@user_id");
     if (userId) {
       try {
-        const response = await fetch(OrderUrl + "user_id=" + userId);
-        const data = await response.json();
+        const response = await axios.get(
+          `${OrderUrl}user_id=${userId}`
+        );
+        const { data } = response;
         setOrders(data.orders);
-        setNotification(data.notification)
+        setNotification(data.notification);
+
       } catch (error) {
         console.error("Error fetching orders:", error);
       }
@@ -87,8 +91,8 @@ const OrderList = ({ initialParams }) => {
     return (
       <TouchableOpacity style={[styles.orderContainer, statusStyle]}>
         <View style={{ flex: 1 }}>
-          <Text style={styles.heading}>{item.staff_name}</Text>
           <Text style={styles.heading}> ID: {item.id}</Text>
+          <Text style={styles.heading}>{item.staff_name}</Text>
           <Text style={styles.text}>
             {item.city}, {item.area}, {item.buildingName}, {item.flatVilla},{" "}
             {item.street}

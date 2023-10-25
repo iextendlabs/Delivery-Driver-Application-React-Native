@@ -14,6 +14,7 @@ import OrderListStyle from "../styles/OrderListStyle";
 import Icon from "react-native-vector-icons/Ionicons";
 import { NotificationUrl } from "../config/Api";
 import { useNavigation } from '@react-navigation/native';
+import axios from "axios";
 
 const OrderList = ({ initialParams }) => {
   const [notification, setNotification] = useState([]);
@@ -39,23 +40,27 @@ const OrderList = ({ initialParams }) => {
     setLoading(true);
     fetchNotification();
     setLoading(false);
-
+  
     const reloadApp = () => {
       fetchNotification();
     };
-
-    const intervalId = setInterval(reloadApp, 2000); // Reload every 2 seconds
-
-    return () => clearInterval(intervalId);
+  
+    const intervalId = setInterval(reloadApp, 10000); // Reload every 2 seconds
+  
+    return () => {
+      clearInterval(intervalId); // Clear the interval when the component unmounts
+    };
   }, []);
+  
 
   const fetchNotification = async () => {
     const userId = await AsyncStorage.getItem("@user_id");
     if (userId) {
       try {
-        const response = await fetch(NotificationUrl + "user_id=" + userId);
-        const data = await response.json();
-        setNotification(data);
+        const response = await axios.get(
+          `${NotificationUrl}user_id=${userId}`
+        );
+        setNotification(response.data);
       } catch (error) {
         console.error("Error fetching notification:", error);
       }

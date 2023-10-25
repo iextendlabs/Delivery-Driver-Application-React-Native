@@ -28,53 +28,56 @@ const App = () => {
 
   useEffect(() => {
     checkAuthentication();
-    if (requestUserPermission()) {
+
+    try {
+      if (requestUserPermission()) {
+        messaging()
+          .getToken()
+          .then((token) => {
+            console.log(token);
+          });
+      } else {
+        console.log("Failed token status", authStatus);
+      }
+      // Check whether an initial notification is available
       messaging()
-        .getToken()
-        .then((token) => {
-          console.log(token);
+        .getInitialNotification()
+        .then(async (remoteMessage) => {
+          if (remoteMessage) {
+            console.log(
+              "Notification caused app to open from quit state:",
+              remoteMessage.notification
+            );
+          }
         });
-    } else {
-      console.log("Failed token status", authStatus);
-    }
-    // Check whether an initial notification is available
-    messaging()
-      .getInitialNotification()
-      .then(async (remoteMessage) => {
-        if (remoteMessage) {
-          console.log(
-            "Notification caused app to open from quit state:",
-            remoteMessage.notification
-          );
-        }
+
+      // Assume a message-notification contains a "type" property in the data payload of the screen to open
+
+      messaging().onNotificationOpenedApp(async (remoteMessage) => {
+        console.log(
+          "Notification caused app to open from background state:",
+          remoteMessage.notification
+        );
       });
 
-    // Assume a message-notification contains a "type" property in the data payload of the screen to open
+      // Register background handler
+      messaging().setBackgroundMessageHandler(async (remoteMessage) => {
+        console.log("Message handled in the background!", remoteMessage);
+      });
 
-    messaging().onNotificationOpenedApp(async (remoteMessage) => {
-      console.log(
-        "Notification caused app to open from background state:",
-        remoteMessage.notification
-      );
-    });
+      messaging().onMessage(async (remoteMessage) => {
+        const { body, title } = remoteMessage.notification;
+        Alert.alert(`${title}`, `${body}`);
 
-    // Register background handler
-    messaging().setBackgroundMessageHandler(async (remoteMessage) => {
-      console.log("Message handled in the background!", remoteMessage);
-    });
+        setHasNewNotification(true);
+        setIconColor("#FF0000");
+      });
 
-    messaging().onMessage(async (remoteMessage) => {
-      const { body, title } = remoteMessage.notification;
-      Alert.alert(`${title}`, `${body}`);
-
-      setHasNewNotification(true);
-      setIconColor("#FF0000");
-    });
-
-    return() => {
-      setHasNewNotification(false);
-      setIconColor("#000");
-    }
+      return () => {
+        setHasNewNotification(false);
+        setIconColor("#000");
+      };
+    } catch (error) {}
   }, []);
 
   const checkAuthentication = async () => {
@@ -91,7 +94,7 @@ const App = () => {
   return (
     <NavigationContainer>
       <View style={styles.container}>
-        <Drawer.Navigator>
+        <Drawer.Navigator unmountInactiveRoutes={true}>
           <Drawer.Screen name="Login" component={LoginScreen} />
           <Drawer.Screen
             name="OrderList"
