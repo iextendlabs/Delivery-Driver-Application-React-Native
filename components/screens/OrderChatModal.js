@@ -93,7 +93,7 @@ const OrderChatModal = ({ visible, order, onClose }) => {
       <View style={chatStyle}>
         <View style={styles.messageBubble}>
           <Text style={styles.messageText}>{item.text}</Text>
-          <Text style={styles.messageRole}>{item.role}</Text>
+          <Text style={styles.messageRole}>{item.role} {item.time}</Text>
         </View>
       </View>
     );
