@@ -29,6 +29,18 @@ const OrderList = ({ initialParams }) => {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [notification, setNotification] = useState('');
   const navigation = useNavigation();
+  const [displayOrder, setDisplayOrder] = useState([]);
+
+  useEffect(() => {
+    console.log('first time');
+    fetchOrders();
+  }, []);
+
+  useEffect(() => {
+    if (JSON.stringify(orders) !== JSON.stringify(displayOrder)) {
+      setDisplayOrder(orders);
+    }
+  }, [orders]);
 
   const setSuccess = (message) => {
     setSuccessMessage(message);
@@ -45,17 +57,12 @@ const OrderList = ({ initialParams }) => {
   };
 
   useEffect(() => {
-    setLoading(true);
-    fetchOrders();
-
     const reloadApp = () => {
-      fetchOrders();
+      !orderChatModalVisible && navigation.isFocused() && fetchOrders();
     };
-
-    const intervalId = setInterval(reloadApp, 10000); // Reload every 2 seconds
-
+    const intervalId = setInterval(reloadApp, 3000); // Reload every 2 seconds
     return () => clearInterval(intervalId);
-  }, []);
+  }, [orderChatModalVisible]);
 
   const fetchOrders = async () => {
     const userId = await AsyncStorage.getItem("@user_id");
@@ -100,7 +107,7 @@ const OrderList = ({ initialParams }) => {
           <Text style={styles.status}>{item.driver_status}</Text>
         </View>
         <View style={styles.OrderLinks}>
-          <WhatsAppElement showNumber={false} phoneNumber={item.staff_number} />
+          <WhatsAppElement showNumber={false} phoneNumber={item.staff_whatsapp} />
           <PhoneNumber phoneNumber={item.staff_number} showNumber={true} />
           <LocationElement
             latitude={item.latitude}
@@ -243,7 +250,7 @@ const OrderList = ({ initialParams }) => {
         <Text style={styles.noItemsText}>No Order</Text>
       ) : (
         <FlatList
-          data={orders}
+          data={displayOrder}
           renderItem={renderOrder}
           keyExtractor={(item) => item.id.toString()}
         />

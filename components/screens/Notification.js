@@ -41,10 +41,10 @@ const OrderList = ({ initialParams }) => {
     fetchNotification();
 
     const reloadApp = () => {
-      fetchNotification();
+      navigation.isFocused() && fetchNotification();
     };
 
-    const intervalId = setInterval(reloadApp, 10000); // Reload every 2 seconds
+    const intervalId = setInterval(reloadApp, 3000); // Reload every 2 seconds
 
     return () => {
       clearInterval(intervalId); // Clear the interval when the component unmounts

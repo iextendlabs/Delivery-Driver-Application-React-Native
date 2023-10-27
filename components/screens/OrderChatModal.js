@@ -29,17 +29,12 @@ const OrderChatModal = ({ visible, order, onClose }) => {
 
   useEffect(() => {
     if (visible && order) {
+      setChat(null);
       fetchChat();
-      setLoading(true);
-      fetchChat();
-      setLoading(false);
-
       const reloadApp = () => {
         fetchChat();
       };
-
       const intervalId = setInterval(reloadApp, 2000); // Reload every 2 seconds
-
       return () => clearInterval(intervalId);
     }
   }, [visible, order]);
@@ -52,6 +47,7 @@ const OrderChatModal = ({ visible, order, onClose }) => {
     } catch (error) {
       console.error("Error fetching orders:", error);
     }
+    setLoading(false);
   };
 
   const handleSubmitChat = async () => {
