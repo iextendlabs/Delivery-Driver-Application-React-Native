@@ -17,7 +17,7 @@ import LocationElement from "../modules/LocationElement";
 import WhatsAppElement from "../modules/WhatsappElement";
 import PhoneNumber from "../modules/PhoneNumber";
 import OrderChatModal from "./OrderChatModal";
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import axios from "axios";
 
 const OrderList = ({ initialParams }) => {
@@ -30,11 +30,19 @@ const OrderList = ({ initialParams }) => {
   const [notification, setNotification] = useState('');
   const navigation = useNavigation();
   const [displayOrder, setDisplayOrder] = useState([]);
+  const driverStatusActions = {
+    "Pick me": "Accepted",
+    "Accepted": "Coming",
+    "Coming": "Arrived for pick",
+    "Arrived for pick": "Traveling",
+    "Traveling": "Dropped",
+  };
 
-  useEffect(() => {
-    console.log('first time');
-    fetchOrders();
-  }, []);
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchOrders();
+    }, [])
+  );
 
   useEffect(() => {
     if (JSON.stringify(orders) !== JSON.stringify(displayOrder)) {
@@ -130,45 +138,11 @@ const OrderList = ({ initialParams }) => {
             style={styles.icons}
             onPress={() => handleOrderChatStatus(item)}
           />
-          {item.driver_status === "Pick me" && (
-            <TouchableOpacity
-              style={styles.button}
-              onPress={() => handleOrderStatus(item, "Accepted")}
-            >
-              <Text style={styles.buttonText}>Update</Text>
-            </TouchableOpacity>
-          )}
 
-          {item.driver_status === "Accepted" && (
+          {item.driver_status in driverStatusActions && (
             <TouchableOpacity
               style={styles.button}
-              onPress={() => handleOrderStatus(item, "Coming")}
-            >
-              <Text style={styles.buttonText}>Update</Text>
-            </TouchableOpacity>
-          )}
-          {item.driver_status === "Coming" && (
-            <TouchableOpacity
-              style={styles.button}
-              onPress={() => handleOrderStatus(item, "Arrived for pick")}
-            >
-              <Text style={styles.buttonText}>Update</Text>
-            </TouchableOpacity>
-          )}
-
-          {item.driver_status === "Arrived for pick" && (
-            <TouchableOpacity
-              style={styles.button}
-              onPress={() => handleOrderStatus(item, "Traveling")}
-            >
-              <Text style={styles.buttonText}>Update</Text>
-            </TouchableOpacity>
-          )}
-
-          {item.driver_status === "Traveling" && (
-            <TouchableOpacity
-              style={styles.button}
-              onPress={() => handleOrderStatus(item, "Dropped")}
+              onPress={() => handleOrderStatus(item, driverStatusActions[item.driver_status])}
             >
               <Text style={styles.buttonText}>Update</Text>
             </TouchableOpacity>
@@ -202,11 +176,11 @@ const OrderList = ({ initialParams }) => {
             try {
               const response = await fetch(
                 OrderDriverStatusUpdateUrl +
-                  order.id +
-                  "?status=" +
-                  status +
-                  "&user_id=" +
-                  userId
+                order.id +
+                "?status=" +
+                status +
+                "&user_id=" +
+                userId
               );
 
               if (!response.ok) {
