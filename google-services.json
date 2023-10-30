@@ -28,7 +28,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:871352006740:android:dced243d62e33b54bed5c1",
         "android_client_info": {
-          "package_name": "com.iextendlabs.saloon"
+          "package_name": "com.iextendlabs.driver.saloon"
         }
       },
       "oauth_client": [],
