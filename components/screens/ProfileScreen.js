@@ -5,56 +5,53 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  Alert,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LoginUrl } from "../config/Api";
-import axios from "axios";
+import axios from 'axios';
 import messaging from "@react-native-firebase/messaging";
-import { useFocusEffect } from '@react-navigation/native';
 
-const LoginScreen = () => {
+const ProfileScreen = () => {
   const navigation = useNavigation();
-
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [fcmToken, setFcmToken] = useState("");
+  const [isAuthenticated, setIsAuthenticated] = useState(true);
+  const [error, setError] = useState();
+  
   useFocusEffect(
     React.useCallback(() => {
       checkAuthentication();
     }, [])
   );
 
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [error, setError] = useState();
-  const [fcmToken, setFcmToken] = useState("");
   useEffect(() => {
     checkAuthentication();
-    typeof unsubscribeOnTokenRefreshed === "function" &&
-      unsubscribeOnTokenRefreshed();
-  }, [navigation]);
-
+    typeof unsubscribeOnTokenRefreshed === 'function' && unsubscribeOnTokenRefreshed();
+  }, []);
   try {
-    const unsubscribeOnTokenRefreshed = messaging().onTokenRefresh(
-      (fcmToken) => {
-        // Save the FCM token to your server or user's device storage
-        console.log("FCM Token:", fcmToken);
-      }
-    );
+
+    const unsubscribeOnTokenRefreshed = messaging().onTokenRefresh((fcmToken) => {
+      // Save the FCM token to your server or user's device storage
+      console.log('FCM Token:', fcmToken);
+    });
 
     messaging()
       .getToken()
-      .then((fcmToken) => {
+      .then(fcmToken => {
         setFcmToken(fcmToken);
       });
-  } catch (error) {}
+  } catch (error) {
+    
+  }
+
   const checkAuthentication = async () => {
     try {
       const userId = await AsyncStorage.getItem("@user_id");
-      if (userId) {
-        navigation.navigate("OrderList");
-      }
+      setIsAuthenticated(!!userId);
     } catch (error) {
+      setIsAuthenticated(false);
       console.log("Error retrieving user ID:", error);
     }
   };
@@ -71,8 +68,8 @@ const LoginScreen = () => {
         const accessToken = response.data.access_token;
 
         // Store access token in AsyncStorage
-        await AsyncStorage.setItem("@access_token", accessToken);
-        await AsyncStorage.setItem("@user_id", String(userId));
+        await AsyncStorage.setItem('@access_token', accessToken);
+        await AsyncStorage.setItem('@user_id', String(userId));
         const headers = {
           Authorization: `Bearer ${accessToken}`,
         };
@@ -80,8 +77,6 @@ const LoginScreen = () => {
           index: 0,
           routes: [{ name: 'OrderList' }],
         });
-        // navigation.navigate("OrderList");
-
       } else {
         setError("Login failed. Please try again.");
       }
@@ -91,27 +86,45 @@ const LoginScreen = () => {
     }
   };
 
+  const handleLogout = async () => {
+    try {
+      // Remove the user_id from AsyncStorage
+      await AsyncStorage.removeItem('@user_id');
+      await AsyncStorage.removeItem('@access_token');
+      setIsAuthenticated(false);
+    } catch (error) {
+      console.log('Error occurred during logout:', error);
+    }
+  };
+
   return (
     <View style={styles.container}>
-      <Text style={styles.error}>{error}</Text>
-      <Text style={styles.title}>Login</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Username"
-        value={username}
-        onChangeText={setUsername}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        secureTextEntry
-        value={password}
-        onChangeText={setPassword}
-      />
-      <TouchableOpacity style={styles.button} onPress={handleLogin}>
-        <Text style={styles.buttonText}>Login</Text>
+    <Text style={styles.error}>{error}</Text>
+    {isAuthenticated ? ( // Conditionally render the login form or logout button
+      <TouchableOpacity style={styles.button} onPress={handleLogout}>
+        <Text style={styles.buttonText}>Logout</Text>
       </TouchableOpacity>
-    </View>
+    ) : (
+      <>
+        <TextInput
+          style={styles.input}
+          placeholder="Username"
+          value={username}
+          onChangeText={setUsername}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Password"
+          secureTextEntry
+          value={password}
+          onChangeText={setPassword}
+        />
+        <TouchableOpacity style={styles.button} onPress={handleLogin}>
+          <Text style={styles.buttonText}>Login</Text>
+        </TouchableOpacity>
+      </>
+    )}
+  </View>
   );
 };
 
@@ -154,4 +167,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default LoginScreen;
+export default ProfileScreen;

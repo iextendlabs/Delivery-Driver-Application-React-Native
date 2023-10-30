@@ -87,7 +87,10 @@ const OrderList = ({ initialParams }) => {
         console.error("Error fetching orders:", error);
       }
     } else {
-      navigation.navigate("Login");
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Profile' }],
+      });
     }
   };
 
