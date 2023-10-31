@@ -20,7 +20,7 @@ const WhatsAppElement = ({ phoneNumber, showNumber }) => {
 
   return (
     <TouchableOpacity onPress={openWhatsAppMessage} style={{ flexDirection: 'row', alignItems: 'center' }}>
-      <Icon name="logo-whatsapp" size={25} color="green" />
+      <Icon name="logo-whatsapp" size={40} color="green" style={{marginRight: 10}} />
       { showNumber && <Text style={{ marginLeft: 8 }}>{phoneNumber}</Text> }
     </TouchableOpacity>
   );

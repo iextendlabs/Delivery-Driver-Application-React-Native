@@ -80,7 +80,15 @@ const OrderList = ({ initialParams }) => {
           `${OrderUrl}user_id=${userId}`
         );
         const { data } = response;
-        setOrders(data.orders);
+        const sortedOrders = data.orders.sort((a, b) => {
+          const statusOrder = { "Pending": 1, "Dropped": 2 };
+          
+          const aOrder = statusOrder[a.status] || 0; // Use 0 for other statuses
+          const bOrder = statusOrder[b.status] || 0;
+        
+          return aOrder - bOrder;
+        });
+        setOrders(sortedOrders);
         setNotification(data.notification);
         setLoading(false);
       } catch (error) {
@@ -107,15 +115,24 @@ const OrderList = ({ initialParams }) => {
     }
     return (
       <TouchableOpacity style={[styles.orderContainer, statusStyle]}>
-        <View style={{ flex: 1 }}>
-          <Text style={styles.heading}> ID: {item.id}</Text>
+        <View>
+          <Text style={styles.heading}> ID: {item.id} {item.driver_status}</Text>
           <Text style={styles.heading}>{item.staff_name}</Text>
           <Text style={styles.text}>
             {item.city}, {item.area}, {item.buildingName}, {item.flatVilla},{" "}
             {item.street}
           </Text>
           <Text style={styles.text}>{item.time_slot_value}</Text>
-          <Text style={styles.status}>{item.driver_status}</Text>
+        </View>
+        <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
+          <Icon
+            name="chatbubble-ellipses-outline"
+            size={20}
+            color="blue" // Change this to your desired color for 'Pending' status.
+            style={styles.icons}
+            onPress={() => handleOrderChatStatus(item)}
+          />
+          <Text>{item.last_chat.text}</Text>
         </View>
         <View style={styles.OrderLinks}>
           <WhatsAppElement showNumber={false} phoneNumber={item.staff_whatsapp} />
@@ -136,7 +153,7 @@ const OrderList = ({ initialParams }) => {
 
           <Icon
             name="chatbubble-ellipses-outline"
-            size={25}
+            size={40}
             color="blue" // Change this to your desired color for 'Pending' status.
             style={styles.icons}
             onPress={() => handleOrderChatStatus(item)}
@@ -151,6 +168,8 @@ const OrderList = ({ initialParams }) => {
             </TouchableOpacity>
           )}
         </View>
+        
+
 
         {/* Other order fields */}
       </TouchableOpacity>
@@ -174,7 +193,7 @@ const OrderList = ({ initialParams }) => {
           style: "cancel",
         },
         {
-          text: "Accept",
+          text: "Update",
           onPress: async () => {
             try {
               const response = await fetch(
@@ -187,13 +206,13 @@ const OrderList = ({ initialParams }) => {
               );
 
               if (!response.ok) {
-                throw new Error("Failed to " + status + " order.");
+                throw new Error("Failed to update");
               }
 
-              setSuccess("Order " + status + " successfully.");
+              setSuccess("Order set to " + status + " successfully.");
               fetchOrders();
             } catch (error) {
-              setError("Failed to " + status + " order. Please try again.");
+              setError("Failed. Please try again.");
             }
           },
         },

@@ -19,7 +19,7 @@ const ProfileScreen = () => {
   const [fcmToken, setFcmToken] = useState("");
   const [isAuthenticated, setIsAuthenticated] = useState(true);
   const [error, setError] = useState();
-  
+  const [loginButtonText, setLoginButtonText] = useState("Login");
   useFocusEffect(
     React.useCallback(() => {
       checkAuthentication();
@@ -56,6 +56,7 @@ const ProfileScreen = () => {
     }
   };
   const handleLogin = async () => {
+    setLoginButtonText("loading...");
     try {
       const response = await axios.post(LoginUrl, {
         username: username,
@@ -84,6 +85,7 @@ const ProfileScreen = () => {
       setError("These credentials do not match our records.");
       // console.log("Error occurred during login:", error);
     }
+    setLoginButtonText("Login");
   };
 
   const handleLogout = async () => {
@@ -120,7 +122,7 @@ const ProfileScreen = () => {
           onChangeText={setPassword}
         />
         <TouchableOpacity style={styles.button} onPress={handleLogin}>
-          <Text style={styles.buttonText}>Login</Text>
+          <Text style={styles.buttonText}>{loginButtonText}</Text>
         </TouchableOpacity>
       </>
     )}

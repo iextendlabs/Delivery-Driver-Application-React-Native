@@ -19,9 +19,7 @@ const OrderListStyle = {
   orderContainer: {
     padding: 10,
     backgroundColor: "#f8f8f8",
-    marginBottom: 10,
-    flexDirection: 'column'
-  },
+    marginBottom: 10  },
   Pending: {
     backgroundColor: '#bfd9ff',
   },
@@ -289,6 +287,10 @@ const OrderListStyle = {
     marginBottom: 10,
     flexDirection: "row",
   },
+  icons: {
+    marginRight:10,
+    marginLeft:10
+  }
 };
 
 export default OrderListStyle;
