@@ -5,10 +5,12 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
+  Switch,
+  Button,
 } from "react-native";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { LoginUrl } from "../config/Api";
+import { LoginUrl, TokenUrl } from "../config/Api";
 import axios from 'axios';
 import messaging from "@react-native-firebase/messaging";
 
@@ -20,31 +22,76 @@ const ProfileScreen = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(true);
   const [error, setError] = useState();
   const [loginButtonText, setLoginButtonText] = useState("Login");
+  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+
+  const requestNotificationPermission = async () => {
+    try {
+      const authStatus = await messaging().requestPermission();
+      if (
+        authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+        authStatus === messaging.AuthorizationStatus.PROVISIONAL
+      ) {
+        setNotificationsEnabled(true);
+        await AsyncStorage.setItem('@notifications', true);
+        const fcmToken = await messaging().getToken();
+        return fcmToken;
+      } else if (authStatus === messaging.AuthorizationStatus.DENIED) {
+        // Handle denied permission
+      }
+    } catch (error) {
+      console.error("Error while requesting notification permission:", error);
+      // Handle any errors that may occur during the permission request.
+    }
+    return null;
+  };
+
+  const toggleNotificationPermission = async () => {
+    try {
+      const userId = await AsyncStorage.getItem("@user_id");
+      let device_token = '';
+      if (notificationsEnabled) {
+        // You can implement logic to disable notifications here
+        setNotificationsEnabled(false);
+        await AsyncStorage.removeItem('@notifications');
+        await messaging().deleteToken();
+      } else {
+        device_token = requestNotificationPermission();
+      }
+      device_token = (typeof device_token === 'string' && device_token) || null;
+      const response = await axios.post(TokenUrl, {
+        user_id: userId,
+        device_token: device_token,
+      });
+
+      if (response.status === 200) {
+        Alert.alert('Notifications', 'Notifications Are Enabled');
+      } else {
+        Alert.alert('Notifications', 'Unable to Activate!');
+      }
+    } catch (error) {
+      Alert.alert('Notifications', 'Unable to Activate!');
+    }
+  };
   useFocusEffect(
     React.useCallback(() => {
       checkAuthentication();
+      isAuthenticated && requestNotificationPermission();
     }, [])
   );
 
   useEffect(() => {
     checkAuthentication();
-    typeof unsubscribeOnTokenRefreshed === 'function' && unsubscribeOnTokenRefreshed();
+    try {
+
+      messaging()
+        .getToken()
+        .then(fcmToken => {
+          setFcmToken(fcmToken);
+        });
+    } catch (error) {
+
+    }
   }, []);
-  try {
-
-    const unsubscribeOnTokenRefreshed = messaging().onTokenRefresh((fcmToken) => {
-      // Save the FCM token to your server or user's device storage
-      console.log('FCM Token:', fcmToken);
-    });
-
-    messaging()
-      .getToken()
-      .then(fcmToken => {
-        setFcmToken(fcmToken);
-      });
-  } catch (error) {
-    
-  }
 
   const checkAuthentication = async () => {
     try {
@@ -101,32 +148,39 @@ const ProfileScreen = () => {
 
   return (
     <View style={styles.container}>
-    <Text style={styles.error}>{error}</Text>
-    {isAuthenticated ? ( // Conditionally render the login form or logout button
-      <TouchableOpacity style={styles.button} onPress={handleLogout}>
-        <Text style={styles.buttonText}>Logout</Text>
-      </TouchableOpacity>
-    ) : (
-      <>
-        <TextInput
-          style={styles.input}
-          placeholder="Username"
-          value={username}
-          onChangeText={setUsername}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Password"
-          secureTextEntry
-          value={password}
-          onChangeText={setPassword}
-        />
-        <TouchableOpacity style={styles.button} onPress={handleLogin}>
-          <Text style={styles.buttonText}>{loginButtonText}</Text>
-        </TouchableOpacity>
-      </>
-    )}
-  </View>
+      <Text style={styles.error}>{error}</Text>
+      {isAuthenticated ? ( // Conditionally render the login form or logout button
+        <>
+          <Text>Enable Notifications</Text>
+          <Switch
+            value={notificationsEnabled}
+            onValueChange={toggleNotificationPermission}
+          />
+          <TouchableOpacity style={styles.button} onPress={handleLogout}>
+            <Text style={styles.buttonText}>Logout</Text>
+          </TouchableOpacity>
+        </>
+      ) : (
+        <>
+          <TextInput
+            style={styles.input}
+            placeholder="Username"
+            value={username}
+            onChangeText={setUsername}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Password"
+            secureTextEntry
+            value={password}
+            onChangeText={setPassword}
+          />
+          <TouchableOpacity style={styles.button} onPress={handleLogin}>
+            <Text style={styles.buttonText}>{loginButtonText}</Text>
+          </TouchableOpacity>
+        </>
+      )}
+    </View>
   );
 };
 

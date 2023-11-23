@@ -23,7 +23,11 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.iextendlabs.driver.saloon"
+      "package": "com.iextendlabs.driver.saloon",
+      "permissions": [
+        "android.permission.INTERNET",
+        "android.permission.ACCESS_WIFI_STATE"      
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -32,6 +36,6 @@
       "eas": {
         "projectId": "b1d648fc-760c-44a6-954d-67a27f2b5d04"
       }
-    },
+    }
   }
 }

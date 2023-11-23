@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Alert } from "react-native";
-import { NavigationContainer, useNavigation } from "@react-navigation/native";
+import React, { useState } from "react";
+import { View, StyleSheet, Alert } from "react-native";
+import { NavigationContainer } from "@react-navigation/native";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import MainStyles from "./components/styles/Main";
 import OrderList from "./components/screens/OrderList";
@@ -11,72 +11,26 @@ import Icon from "react-native-vector-icons/Ionicons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 const Drawer = createDrawerNavigator();
 const App = () => {
-  const [hasNewNotification, setHasNewNotification] = useState(false);
   const [iconColor, setIconColor] = useState("#000");
-  const requestUserPermission = async () => {
-    const authStatus = await messaging().requestPermission();
-    const enabled =
-      authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
-      authStatus === messaging.AuthorizationStatus.PROVISIONAL;
 
-    if (enabled) {
-      console.log("Authorization status:", authStatus);
-    }
+  const getNotificationsEnabled = async () => {
+    const userId = await AsyncStorage.getItem("@notifications");
+    return !!(userId);
   };
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  useEffect(() => {
-    checkAuthentication();
-  }, []);
+  const notificationsEnabled = getNotificationsEnabled(); // Implement this function to get the user's preference
 
-  const checkAuthentication = async () => {
-      const userId = await AsyncStorage.getItem("@user_id");
-      if (!userId) {
-        setIsAuthenticated(false);
-      }
-      try {
-        if (requestUserPermission()) {
-          messaging()
-            .getToken()
-            .then((token) => {
-              console.log(token);
-            });
-        } else {
-          console.log("Failed token status", authStatus);
-        }
-        // Check whether an initial notification is available
-        messaging()
-          .getInitialNotification()
-          .then(async (remoteMessage) => {
-            if (remoteMessage) {
-              console.log(
-                "Notification caused app to open from quit state:",
-                remoteMessage.notification
-              );
-            }
-          });
-
-        // Assume a message-notification contains a "type" property in the data payload of the screen to open
-
-        messaging().onNotificationOpenedApp(async (remoteMessage) => {
-          console.log(
-            "Notification caused app to open from background state:",
-            remoteMessage.notification
-          );
-        });
-
-        // Register background handler
-        messaging().setBackgroundMessageHandler(async (remoteMessage) => {
-          console.log("Message handled in the background!", remoteMessage);
-        });
-
-        messaging().onMessage(async (remoteMessage) => {
-          const { body, title } = remoteMessage.notification;
-          Alert.alert(`${title}`, `${body}`);
-        });
-      } catch (error) { }
-    };
-
+if (notificationsEnabled) {
+  try {
+    messaging().onMessage(async (remoteMessage) => {
+      const { body, title } = remoteMessage.notification;
+            Alert.alert(`${title}`, `${body}`);
+      // Handle in-foreground notifications
+    });
+  } catch (error) {
+      
+  }
+}
   return (
     <NavigationContainer>
       <View style={styles.container}>
