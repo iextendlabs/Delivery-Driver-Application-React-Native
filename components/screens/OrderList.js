@@ -81,7 +81,7 @@ const OrderList = ({ initialParams }) => {
         );
         const { data } = response;
         const sortedOrders = data.orders.sort((a, b) => {
-          const statusOrder = { "Pending": 1, "Dropped": 2 };
+          const statusOrder = { "Confirm": 1, "Dropped": 2 };
           
           const aOrder = statusOrder[a.status] || 0; // Use 0 for other statuses
           const bOrder = statusOrder[b.status] || 0;
@@ -128,7 +128,7 @@ const OrderList = ({ initialParams }) => {
           <Icon
             name="chatbubble-ellipses-outline"
             size={20}
-            color="blue" // Change this to your desired color for 'Pending' status.
+            color="blue" // Change this to your desired color for 'Confirm' status.
             style={styles.icons}
             onPress={() => handleOrderChatStatus(item)}
           />
@@ -154,7 +154,7 @@ const OrderList = ({ initialParams }) => {
           <Icon
             name="chatbubble-ellipses-outline"
             size={40}
-            color="blue" // Change this to your desired color for 'Pending' status.
+            color="blue" // Change this to your desired color for 'Confirm' status.
             style={styles.icons}
             onPress={() => handleOrderChatStatus(item)}
           />

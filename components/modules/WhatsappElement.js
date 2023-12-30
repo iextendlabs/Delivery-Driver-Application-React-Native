@@ -5,17 +5,11 @@ import Icon from 'react-native-vector-icons/Ionicons';
 const WhatsAppElement = ({ phoneNumber, showNumber }) => {
 
   const openWhatsAppMessage = () => {
-    const whatsappUrl = `whatsapp://send?phone=${phoneNumber}`;
-
-    Linking.canOpenURL(whatsappUrl)
-      .then((supported) => {
-        if (!supported) {
-          console.log("WhatsApp is not installed on the device");
-        } else {
-          return Linking.openURL(whatsappUrl);
-        }
-      })
-      .catch((err) => console.error('An error occurred', err));
+    try {
+      Linking.openURL(`https://wa.me/${phoneNumber}`);
+    } catch (error) {
+      console.error("Error opening WhatsApp:", error);
+    }
   };
 
   return (

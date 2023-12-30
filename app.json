@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Saloon Driver",
-    "slug": "saqibashraf",
+    "slug": "driver-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -30,8 +30,8 @@
     },
     "extra": {
       "eas": {
-        "projectId": "b1d648fc-760c-44a6-954d-67a27f2b5d04"
+        "projectId": "47f5cf01-4948-4224-a1b2-a465162256c7"
       }
-    },
+    }
   }
 }
