@@ -119,7 +119,8 @@ const OrderList = ({ initialParams }) => {
           <Text style={styles.heading}> ID: {item.id} {item.driver_status}</Text>
           <Text style={styles.heading}>{item.staff_name}</Text>
           <Text style={styles.text}>
-            {item.city}, {item.area}, {item.buildingName}, {item.flatVilla},{" "}
+          <Icon name="location-sharp" size={15} color="black" />
+            {item.city}, {item.district}, {item.buildingName}, {item.flatVilla},{" "}
             {item.street}
           </Text>
           <Text style={styles.text}>{item.time_slot_value}</Text>
